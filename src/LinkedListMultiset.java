@@ -28,23 +28,24 @@ public class LinkedListMultiset<T> extends Multiset<T>
 			head = newNode;
 			tail = newNode;
 		} else {
-			if(search(item) > 0){
-				newNode.setNum(search(item)+1);
+			int existNum = search(item);
+			if( existNum > 0 ) {
 				Node currNode = head;
 				for(int i=0;i<size;i++){
-					if(currNode.getValue() == item) {
-						currNode.setNum(0);
+					if(currNode.getValue().equals(item)) {
+						currNode.setNum( existNum + 1 );
+						break;
 					}
 					currNode = currNode.getNext();
 				}
 			} else {
 				newNode.setNum(1);
 			}
-			newNode.setNext(head);
-			head.setPrev(newNode);
-			head = newNode;
-			size++;
+			newNode.setPrev(tail);
+			tail.setNext(newNode);
+			tail = newNode;
 		}
+		size++;
 		
 	} // end of add()
 	
@@ -53,7 +54,7 @@ public class LinkedListMultiset<T> extends Multiset<T>
 		
 		Node currNode = head;
 		for(int i=0;i<size;i++){
-			if(currNode.getValue() == item && currNode.getNum() != 0) {
+			if(currNode.getValue().equals(item) && currNode.getNum() != 0) {
 				return currNode.getNum();
 			}
 			currNode = currNode.getNext();
@@ -64,54 +65,91 @@ public class LinkedListMultiset<T> extends Multiset<T>
 	
 	public void removeOne(T item) {
 		
-		Node currNode = head;
-		for(int i=0;i<size;i++){
-			if(currNode.getValue() == item) {
-				currNode.getPrev().setNext(currNode.getNext());
-				if(currNode.getNext() != null) {
-					currNode.getNext().setPrev(currNode.getPrev());
-				} else {
-					tail = currNode.getPrev();
-				}
-				if(currNode.getNum() > 1) {
-					int newNum = currNode.getNum() - 1;
-					do {
-						currNode = currNode.getNext();
-						if(currNode.getValue() == item) {
-							currNode.setNum(newNum);
+		if( search(item) > 0 ) {
+			if( size > 1 ) {
+				Node currNode = tail;
+				boolean removed = false;
+				do {
+					if(currNode.getValue().equals(item)) {
+						if( currNode.getPrev() == null ) {
+							head = currNode.getNext();
+							head.setPrev(null);
+						} else if ( currNode.getNext() == null ) {
+							tail = currNode.getPrev();
+							tail.setNext(null);
+						} else {
+							currNode.getPrev().setNext(currNode.getNext());
+							currNode.getNext().setPrev(currNode.getPrev());
 						}
-					} while(currNode.getValue() != item);
-				}
-				size--;
+						removed = true;
+						if(currNode.getNum() == 0) {
+							Node updateNode = head;
+							for(int i=0;i<size;i++){
+								if( updateNode.getValue().equals(item) ){
+									updateNode.setNum( updateNode.getNum() - 1 );
+									break;
+								}
+								updateNode = updateNode.getNext();
+							}
+						}
+					}
+					currNode = currNode.getPrev();
+				} while( !removed );
+			} else {
+				head = null;
+				tail = null;
 			}
-			currNode = currNode.getNext();
+			size--;
 		}
 		
 	} // end of removeOne()
 	
 	
 	public void removeAll(T item) {
-		// Implement me!
+		
+		if( search(item) > 0 ) {
+			if( size > 1 ) {
+				Node currNode = head;
+				int rmvNo = 0;
+				for(int i=0;i<size;i++){
+					if(currNode.getValue().equals(item)) {
+						if( currNode.getPrev() == null ) {
+							head = currNode.getNext();
+							head.setPrev(null);
+						} else if ( currNode.getNext() == null ) {
+							tail = currNode.getPrev();
+							tail.setNext(null);
+						} else {
+							currNode.getPrev().setNext(currNode.getNext());
+							currNode.getNext().setPrev(currNode.getPrev());
+						}
+						rmvNo++;
+					}
+					currNode = currNode.getNext();
+				}
+				size = size - rmvNo;
+			} else {
+				head = null;
+				tail = null;
+				size = 0;
+			}
+		}
+		
 	} // end of removeAll()
 	
 	
 	public void print(PrintStream out) {
-		// Implement me!
-	} // end of print()
-	
-	
-	/*public int checkNum(T item) {
 		
 		Node currNode = head;
 		for(int i=0;i<size;i++){
-			if(currNode.getValue() == item){
-				return currNode.getValue();
+			if(currNode.getNum() > 0) {
+				out.println(currNode.getValue() + printDelim + currNode.getNum());
 			}
 			currNode = currNode.getNext();
 		}
 		
-	} // end of checkNum()
-*/	
+	} // end of print()
+	
 	
 	private class Node {
 		
@@ -128,7 +166,7 @@ public class LinkedListMultiset<T> extends Multiset<T>
 		Node prev;
 		
 		public Node(T value) {
-			this.value = value;
+			setValue(value);
 			num = 0;
 			next = null;
 			prev = null;
