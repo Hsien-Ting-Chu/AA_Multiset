@@ -1,8 +1,13 @@
 import java.io.PrintStream;
 import java.util.*;
 
-public class SortedLinkedListMultiset<T> extends Multiset<T>
+public class SortedLinkedListMultiset<T> extends Multiset<T> /*implements Comparable<T>*/
 {
+	/*@Override
+	public int compareTo(T o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}*/
 	
 	/** The pointer to the first node. */
 	Node head;
@@ -31,20 +36,49 @@ public class SortedLinkedListMultiset<T> extends Multiset<T>
 		} else {
 			int existNum = search(item);
 			if( existNum > 0 ) {
-				Node currNode = head;
+				Node updateNode = head;
 				for(int i=0;i<size;i++){
-					if(currNode.getValue().equals(item)) {
-						currNode.setNum( existNum + 1 );
+					if(updateNode.getValue().equals(item)) {
+						updateNode.setNum( existNum + 1 );
+						if(updateNode.getNext() != null){
+							updateNode.getNext().setPrev(newNode);
+							newNode.setNext(updateNode.getNext());
+						} else {
+							tail = newNode;
+						}
+						updateNode.setNext(newNode);
+						newNode.setPrev(updateNode);
 						break;
 					}
-					currNode = currNode.getNext();
+					updateNode = updateNode.getNext();
 				}
 			} else {
 				newNode.setNum(1);
+				Node currNode = tail;
+				if( ((String) item).compareTo( (String) currNode.getValue()) == 1 ){
+					newNode.setPrev(tail);
+					tail.setNext(newNode);
+					tail = newNode;
+				} else {
+					for(int i=0;i<size;i++){
+						if(currNode == head){
+							newNode.setNext(head);
+							head.setPrev(newNode);
+							head = newNode;
+							break;
+						} else {
+							currNode = currNode.getPrev();
+							if( ((String) item).compareTo( (String) currNode.getValue()) == 1 ) {
+								currNode.getNext().setPrev(newNode);
+								newNode.setNext(currNode.getNext());
+								newNode.setPrev(currNode);
+								currNode.setNext(newNode);
+								break;
+							}
+						}
+					}
+				}
 			}
-			newNode.setPrev(tail);
-			tail.setNext(newNode);
-			tail = newNode;
 		}
 		size++;
 		
@@ -67,11 +101,14 @@ public class SortedLinkedListMultiset<T> extends Multiset<T>
 	public void removeOne(T item) {
 		
 		if( search(item) > 0 ) {
-			if( size > 1 ) {
-				Node currNode = tail;
-				boolean removed = false;
-				do {
+			if( size > 1) {
+				Node currNode = head;
+				for(int i=0;i<size;i++){
 					if(currNode.getValue().equals(item)) {
+						if( search(item) > 1 ){
+							currNode.setNum( currNode.getNum() - 1 );
+							currNode = currNode.getNext();
+						}
 						if( currNode.getPrev() == null ) {
 							head = currNode.getNext();
 							head.setPrev(null);
@@ -82,20 +119,10 @@ public class SortedLinkedListMultiset<T> extends Multiset<T>
 							currNode.getPrev().setNext(currNode.getNext());
 							currNode.getNext().setPrev(currNode.getPrev());
 						}
-						removed = true;
-						if(currNode.getNum() == 0) {
-							Node updateNode = head;
-							for(int i=0;i<size;i++){
-								if( updateNode.getValue().equals(item) ){
-									updateNode.setNum( updateNode.getNum() - 1 );
-									break;
-								}
-								updateNode = updateNode.getNext();
-							}
-						}
+						break;
 					}
-					currNode = currNode.getPrev();
-				} while( !removed );
+					currNode = currNode.getNext();
+				}
 			} else {
 				head = null;
 				tail = null;
