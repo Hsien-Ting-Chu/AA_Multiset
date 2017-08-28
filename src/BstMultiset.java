@@ -51,12 +51,10 @@ public class BstMultiset<T extends Comparable<T>> extends Multiset<T> {
 				return currNode.getCount();
 			} else if (item.compareTo(currNode.getValue()) > 0) {
 				// if item is greater than the value of current node
-				if (currNode.getRchild() != null)
-					currNode = currNode.getRchild();
+				currNode = currNode.getRchild();
 			} else {
 				// If item is less than the value of current node
-				if (currNode.getLchild() != null)
-					currNode = currNode.getLchild();
+				currNode = currNode.getLchild();
 			}
 		}
 		// End of while loop, and item is not found in the heap
@@ -69,6 +67,7 @@ public class BstMultiset<T extends Comparable<T>> extends Multiset<T> {
 			tnode.setRchild(delete(tnode.getRchild(), item));
 		else if (identical < 0)
 			tnode.setLchild(delete(tnode.getLchild(), item));
+
 		else {
 			if (tnode.getCount() > 1) {
 				tnode.decreaseCount();
@@ -84,7 +83,6 @@ public class BstMultiset<T extends Comparable<T>> extends Multiset<T> {
 				// target node
 				return tnode.getRchild();
 			}
-
 			Node temp = tnode;
 			tnode = getMin(temp.getRchild());
 
@@ -102,14 +100,24 @@ public class BstMultiset<T extends Comparable<T>> extends Multiset<T> {
 	}
 
 	public void removeOne(T item) {
-		mRoot = delete(mRoot, item);
+		try {
+			mRoot = delete(mRoot, item);
+		} catch (Exception e) {
+
+		}
 
 	} // end of removeOne()
 
 	public void removeAll(T item) {
-		int count = mRoot.mCount;
-		for (int i = 0; i<count ; i++)
-		mRoot = delete(mRoot, item);
+
+		try {
+			int count = mRoot.mCount;
+			for (int i = 0; i < count; i++)
+				mRoot = delete(mRoot, item);
+		} catch (Exception e) {
+
+		}
+
 	} // end of removeAll()
 
 	public void print(PrintStream out) {
@@ -122,7 +130,6 @@ public class BstMultiset<T extends Comparable<T>> extends Multiset<T> {
 		}
 		while (!stack.empty() || currNode != null) { // Step through whole list
 														// until stack is empty
-
 			//      6
 			//    /   \
 			//   3     8
@@ -130,7 +137,6 @@ public class BstMultiset<T extends Comparable<T>> extends Multiset<T> {
 			// 2         4
 			//
 			// The traversal will be 2->3->4->6->8
-
 			if (currNode != null) {
 				// Traverse until hit the most left child and push every lchild
 				// into stack
